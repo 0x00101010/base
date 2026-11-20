@@ -22,6 +22,8 @@ base-cli-utils.workspace = true
 # reth
 base-reth-cli.workspace = true
 reth-cli-util.workspace = true
+reth-state-store.workspace = true
+reth-state-store-qmdb.workspace = true
 base-execution-cli = { workspace = true, features = ["otlp"] }
 
 # cli
