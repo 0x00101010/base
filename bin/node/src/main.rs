@@ -16,7 +16,8 @@ static MALLOC_CONF: &[u8] = b"prof:true,prof_active:true,lg_prof_sample:19\0";
 
 /// With `RETH_STATE_STORE_QMDB=<dir>`, keeps current state and its commitment in the QMDB
 /// database at `<dir>` (created by `qmdb-migrate`) instead of the hashed state and trie tables.
-/// `RETH_STATE_STORE_QMDB_CACHE_PAGES` (4 KiB pages) and `RETH_STATE_STORE_QMDB_THREADS` tune it.
+/// `RETH_STATE_STORE_QMDB_CACHE_PAGES` (4 KiB pages), `RETH_STATE_STORE_QMDB_THREADS` and
+/// `RETH_STATE_STORE_QMDB_RETAIN_BLOCKS` (history kept before pruning) tune it.
 fn install_state_store() {
     let Some(dir) = std::env::var_os("RETH_STATE_STORE_QMDB") else { return };
     let mut config = reth_state_store_qmdb::QmdbConfig::new(dir);
@@ -26,6 +27,11 @@ fn install_state_store() {
     }
     if let Some(threads) = env_usize("RETH_STATE_STORE_QMDB_THREADS") {
         config.threads = threads;
+    }
+    if let Some(blocks) =
+        std::env::var("RETH_STATE_STORE_QMDB_RETAIN_BLOCKS").ok().and_then(|v| v.parse().ok())
+    {
+        config.retain_blocks = blocks;
     }
     let store = reth_state_store_qmdb::QmdbStateStore::open(config.clone())
         .unwrap_or_else(|error| panic!("opening QMDB state store at {config:?}: {error}"));
